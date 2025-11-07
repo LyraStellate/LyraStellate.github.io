@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<!-- ★ <html> タグに JS で 'dark' クラスが追加されます -->
+<html lang="ja" class="scroll-smooth">
+<head>
+    <!-- ★ 修正: 文字コードを "UTF-8" に修正 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyra's profile</title>
+    
+    <!-- ★ 修正: Tailwind CDN を先に読み込む -->
+    <!-- Tailwind CSS CDN --><script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- ★ 修正: Tailwind Config を CDN の後 に配置 -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class', // 'class' 戦略を有効化
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts (Inter & Noto Sans JP) --><link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome (for Icons) --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <!-- 外部CSSファイル --><link rel="stylesheet" href="style.css">
+</head>
+<!-- ★ トランジションを追加 -->
+<body class="text-gray-800 antialiased transition-colors duration-300 dark:text-gray-200">
+
+    <!-- パーティクル背景用のキャンバス --><canvas id="particle-canvas"></canvas>
+    <!-- ★ 追加: カーソル追従パーティクル用のキャンバス -->
+    <canvas id="cursor-particle-canvas"></canvas>
+
+
+    <!-- ===== ナビゲーションバー ===== -->
+    <header class="fixed top-0 left-0 w-full z-50 transition-all duration-300">
+        <!-- ★ nav要素にダークモードのスタイルを追加 -->
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div>
+                <!-- ★ ロゴのテキスト色を更新 -->
+                <a href="#" class="text-2xl font-bold text-gray-900 dark:text-gray-100 transition-colors duration-300 hover:text-blue-500 dark:hover:text-blue-400">LyraProfile</a>
+            </div>
+            
+            <!-- ★ モバイル用 (右側) コントロール (順序変更) -->
+            <div class="flex items-center space-x-2 md:hidden">
+                <!-- ★ モバイル用テーマ切り替えボタン (ホバー背景削除、アイコン構造変更) ★ -->
+                <button class="theme-toggle p-2 rounded-full text-gray-700 dark:text-gray-300 transition-colors" aria-label="テーマを切り替え">
+                    <!-- ★ アニメーション用ラッパー -->
+                    <div class="theme-icon-wrapper">
+                        <i class="fas fa-moon icon-moon text-lg"></i>
+                        <i class="fas fa-sun icon-sun text-lg"></i>
+                    </div>
+                </button>
+                
+                <!-- ハンバーガーメニューボタン -->
+                <button id="menu-btn" class="z-50 p-2" aria-label="メニューを開く">
+                    <div class="space-y-1.5">
+                        <!-- ★ ハンバーガーラインの色を更新 -->
+                        <span class="hamburger-line line-1 block w-6 h-0.5 bg-gray-900 dark:bg-gray-100"></span>
+                        <span class="hamburger-line line-2 block w-6 h-0.5 bg-gray-900 dark:bg-gray-100"></span>
+                        <span class="hamburger-line line-3 block w-6 h-0.5 bg-gray-900 dark:bg-gray-100"></span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- ★ デスクトップ用メニュー (中央揃えのため items-center を追加) -->
+            <div class="hidden md:flex items-center space-x-8">
+                <!-- ★ nav-link のテキスト色を更新 -->
+                <a href="#about" class="nav-link text-gray-700 dark:text-gray-300">About</a>
+                <a href="#history" class="nav-link text-gray-700 dark:text-gray-300">History</a>
+                <a href="#gallery" class="nav-link text-gray-700 dark:text-gray-300">Gallery</a>
+                
+                <!-- ★ デスクトップ用テーマ切り替えボタン (ホバー背景削除、アイコン構造変更) ★ -->
+                <button class="theme-toggle p-2 rounded-full text-gray-700 dark:text-gray-300 transition-colors" aria-label="テーマを切り替え">
+                    <!-- ★ アニメーション用ラッパー -->
+                    <div class="theme-icon-wrapper">
+                        <i class="fas fa-moon icon-moon text-lg"></i>
+                        <i class="fas fa-sun icon-sun text-lg"></i>
+                    </div>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ===== モバイル用メニューパネル ===== -->
+    <!-- ★ 背景とテキスト色を更新 -->
+    <div id="mobile-menu" class="fixed top-0 right-0 w-full h-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-40 flex flex-col justify-center items-center space-y-8">
+        <a href="#about" class="menu-link text-3xl font-bold text-gray-800 dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-300">About</a>
+        <a href="#history" class="menu-link text-3xl font-bold text-gray-800 dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-300">History</a>
+        <a href="#gallery" class="menu-link text-3xl font-bold text-gray-800 dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-300">Gallery</a>
+    </div>
+
+    <main>
+        <!-- ===== ヒーローセクション ===== -->
+        <section id="hero" class="h-[90vh] flex items-end justify-center pb-20 relative hero-bg overflow-hidden">
+            <!-- 浮遊するパーティクル (既存) -->
+            <div class="absolute inset-0 z-0">
+                <div class="hero-particle particle-1"></div>
+                <div class="hero-particle particle-2"></div>
+                <div class="hero-particle particle-3"></div>
+                <div class="hero-particle particle-4"></div>
+            </div>
+            
+            <div class="absolute inset-0 z-10 overflow-hidden hidden md:block" aria-hidden="true">
+                <!-- 左側の装飾 --><div class="hero-decoration left">
+                    <div class="shape shape-1"></div>
+                    <div class="shape shape-2"></div>
+                </div>
+                <!-- 右側の装飾 --><div class="hero-decoration right">
+                    <div class="shape shape-3"></div>
+                    <div class="shape shape-4"></div>
+                </div>
+            </div>
+            <div class="absolute inset-0 hero-gradient z-20"></div>
+            
+            <div class="relative text-center z-30 fade-in-up"> 
+                <!-- ★ テキスト色を更新 -->
+                <h1 class="text-6xl md:text-8xl font-black text-gray-800 dark:text-gray-100 tracking-tighter" style="text-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    <p>&nbsp;Lyra*</p>
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-700 dark:text-gray-300 mt-2" style="padding: 20px;">VRChat User & AmateurPhotographer</p>
+                
+                <!-- SNSリンク -->
+                <div class="flex justify-center space-x-6 mt-8">
+                    <!-- ★ icon-link の色を更新 -->
+                    <a href="https://vrchat.com/home/user/usr_96b501df-06b2-4cdb-9fc5-481560324cf0" target="_blank" class="icon-link" aria-label="VRChat">
+                        <i class="fa-jelly fa-regular fa-comment"></i></a>
+                    <a href="https://x.com/LyraStellate" target="_blank" class="icon-link" aria-label="X (Twitter)">
+                        <i class="fa-brands fa-x-twitter"></i>
+                    </a>
+                    <a href="http://discordapp.com/users/1360811471230996623" target="_blank" class="icon-link" aria-label="Discord">
+                        <i class="fa-brands fa-discord"></i>
+                    </a>
+                    <a href="#" target="_blank" class="icon-link" aria-label="BOOTH">
+                        <i class="fas fa-store"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== About セクション ===== -->
+        <section id="about" class="container mx-auto px-6 py-16 md:py-24">
+            <div class="max-w-3xl mx-auto flex flex-col md:flex-row items-center md:items-start md:space-x-8 fade-in-right">
+                
+                <img src="https://pbs.twimg.com/profile_images/1951450967997837312/XZDdX437_400x400.jpg" alt="アバターアイコン" class="w-28 h-28 rounded-full shadow-md mb-6 md:mb-0 flex-shrink-0 avatar-hover-effect">
+
+                <!-- テキストコンテンツ -->
+                <div class="text-center md:text-left w-full">
+                    <!-- ★ テキスト色を更新 -->
+                    <h2 class="text-4xl font-bold text-gray-800 mb-6 dark:text-gray-100">About Me</h2>
+                    <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+                        Lyraと書いて「りあ」と読みます.*<br>
+                        音楽を聞くのがすきです。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ===== History セクション ===== -->
+        <section id="history" class="py-16 md:py-24 history-bg overflow-hidden">
+            <div class="container mx-auto px-6">
+                <!-- ★ テキスト色を更新 -->
+                <h2 class="text-4xl font-bold text-center mb-12 md:mb-16 text-gray-800 fade-in-up dark:text-gray-100">History</h2>
+
+                <!-- デスクトップ用レイアウト -->
+                <div class="hidden md:block relative max-w-6xl mx-auto timeline-horizontal">
+                    <!-- タイムラインの本体 (矢印) -->
+                    <div class="absolute left-0 w-full h-8 flex items-center timeline-arrow-wrapper">
+                        <!-- 線 (アニメーションで描画) -->
+                        <div class="history-line absolute h-full w-full bg-transparent flex">
+                            <!-- ★ 矢印の色を更新 (CSS側で .dark を指定) -->
+                            <div class="arrow-segment timeline-segment timeline-segment-1"></div>
+                            <div class="arrow-segment timeline-segment timeline-segment-2"></div>
+                            <div class="arrow-segment timeline-segment timeline-segment-3"></div>
+                            <div class="arrow-segment timeline-segment timeline-segment-4"></div>
+                            <div class="arrow-segment timeline-segment timeline-segment-5"></div>
+                        </div>
+                    </div>
+
+                    <!-- イベント項目 -->
+                    <div class="relative flex justify-between w-full h-auto">
+                        <!-- ★ 各項目のテキスト・アイコン色を更新 (CSS側で .dark を指定) -->
+                        
+                        <!-- Item 1: 上部 -->
+                        <div class="timeline-item timeline-item-bottom fade-in-up group" style="transition-delay: 0.2s;">
+                            <div class="timeline-content-wrapper">
+                                <div class="timeline-year font-extrabold text-2xl">2022.03.06</div>
+                                <div class="timeline-description text-gray-700 mt-2 text-base">VRChat デビュー</div>
+                            </div>
+                            <div class="timeline-icon-box">
+                                <i class="fa-solid fa-rocket timeline-icon"></i>
+                            </div>
+                            <div class="history-popup-horizontal">
+                                <div class="p-4">
+                                    <h4 class="font-bold text-gray-800">VRChat デビュー</h4>
+                                    <p class="text-sm text-gray-600 mt-1">初めてVRの世界へ。正直あんまり覚えてません！</p>
+                                </div>
+                                <img src="https://placehold.co/400x300/BFDBFE/1E3A8A?text=VRC+Debut" alt="VRChat デビュー" class="w-full h-32 object-cover">
+                            </div>
+                        </div>
+
+                        <!-- Item 1: 上部 -->
+                        <div class="timeline-item timeline-item-top fade-in-up group" style="transition-delay: 0.2s;">
+                            <div class="timeline-content-wrapper">
+                                <div class="timeline-year font-extrabold text-2xl">2022.09.28</div>
+                                <div class="timeline-description text-gray-700 mt-2 text-base">紫枠</div>
+                            </div>
+                            <div class="timeline-icon-box">
+                                <i class="fa-solid fa-arrow-up"></i>
+                            </div>
+                            <div class="history-popup-horizontal">
+                                <div class="p-4">
+                                    <h4 class="font-bold text-gray-800">トラステッド</h4>
+                                    <p class="text-sm text-gray-600 mt-1">意外と時間かかった</p>
+                                </div>
+                                <img src="https://placehold.co/400x300/BFDBFE/1E3A8A?text=VRC+Debut" alt="VRChat デビュー" class="w-full h-32 object-cover">
+                            </div>
+                        </div>
+
+                        <!-- Item 2: 下部 -->
+                        <div class="timeline-item timeline-item-bottom fade-in-up group" style="transition-delay: 0.4s;">
+                            <div class="timeline-icon-box">
+                                <i class="fa-solid fa-person"></i>
+                            </div>
+                            <div class="timeline-content-wrapper">
+                                <div class="timeline-year font-extrabold text-2xl">2024.05.15</div>
+                                <div class="timeline-description text-gray-700 mt-2 text-base">ライムちゃん</div>
+                            </div>
+                            <div class="history-popup-horizontal">
+                                <img src="https://pbs.twimg.com/media/GNlu5l0a4AAo8Bx?format=jpg&name=large" alt="ライムちゃん" class="w-full h-32 object-cover">
+                                <div class="p-4">
+                                    <h4 class="font-bold text-gray-800">ライムちゃんになる</h4>
+                                    <p class="text-sm text-gray-600 mt-1">フレンドさんからいただいてライムちゃんになりました</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Item 3: 上部 -->
+                        <div class="timeline-item timeline-item-top fade-in-up group" style="transition-delay: 0.6s;">
+                            <div class="timeline-content-wrapper">
+                                <div class="timeline-year font-extrabold text-2xl">2024.11.11</div>
+                                <div class="timeline-description text-gray-700 mt-2 text-base">シフォンちゃん</div>
+                            </div>
+                            <div class="timeline-icon-box">
+                                <i class="fa-solid fa-person"></i>
+                            </div>
+                            <div class="history-popup-horizontal">
+                                <div class="p-4">
+                                    <h4 class="font-bold text-gray-800">シフォンちゃんになる</h4>
+                                    <p class="text-sm text-gray-600 mt-1">シフォンちゃん似合いそうと言われたのでシフォンちゃんになりました</p>
+                                </div>
+                                <img src="https://pbs.twimg.com/media/GoYGDPwXUAAhKdw?format=jpg&name=medium" alt="シフォンちゃん" class="w-full h-32 object-cover">
+                            </div>
+                        </div>
+
+                        <!-- Item 4: 下部 -->
+                        <div class="timeline-item timeline-item-bottom fade-in-up group" style="transition-delay: 0.8s;">
+                            <div class="timeline-icon-box">
+                                <i class="fa-solid fa-earth-americas timeline-icon"></i>
+                            </div>
+                            <div class="timeline-content-wrapper">
+                                <div class="timeline-year font-extrabold text-2xl">202X.XX.XX</div>
+                                <div class="timeline-description text-gray-700 mt-2 text-base">未定</div>
+                            </div>
+                            <div class="history-popup-horizontal">
+                                <img src="https://placehold.co/400x300/A5B4FC/1E3A8A?text=NoImage" alt="NoImage" class="w-full h-32 object-cover">
+                                <div class="p-4">
+                                    <h4 class="font-bold text-gray-800">これから</h4>
+                                    <p class="text-sm text-gray-600 mt-1">？？？</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- モバイル用 (縦型) -->
+                <div class="md:hidden max-w-2xl mx-auto relative timeline-vertical">
+                    <!-- ★ 線の色を更新 (CSS) -->
+                    <div class="history-line-mobile absolute left-2 top-0 w-0.5 bg-blue-300"></div>
+                    
+                    <!-- Item 1 -->
+                    <div class="relative pl-16 mb-12 group fade-in-up">
+                        <div class="timeline-icon-box-mobile">
+                            <i class="fa-solid fa-rocket timeline-icon"></i>
+                        </div>
+                        <div class="timeline-content-wrapper-mobile">
+                            <div class="timeline-year font-extrabold text-xl">2022.03.06</div>
+                            <div class="timeline-description text-gray-700 mt-1 text-base">VRChat デビュー</div>
+                        </div>
+                        <div class="history-popup-mobile">
+                            <img src="https://placehold.co/400x300/BFDBFE/1E3A8A?text=VRC+Debut" alt="VRChat デビュー" class="w-full h-32 object-cover rounded-t-lg">
+                            <div class="p-4">
+                                <h4 class="font-bold text-gray-800">VRChat デビュー</h4>
+                                <p class="text-sm text-gray-600 mt-1">初めてVRの世界へ。正直あんまり覚えてません！</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Item 1 -->
+                    <div class="relative pl-16 mb-12 group fade-in-up">
+                        <div class="timeline-icon-box-mobile">
+                            <i class="fa-solid fa-arrow-up timeline-icon"></i>
+                        </div>
+                        <div class="timeline-content-wrapper-mobile">
+                            <div class="timeline-year font-extrabold text-xl">2022.09.28</div>
+                            <div class="timeline-description text-gray-700 mt-1 text-base">紫枠</div>
+                        </div>
+                        <div class="history-popup-mobile">
+                            <img src="https://placehold.co/400x300/BFDBFE/1E3A8A?text=VRC+Debut" alt="VRChat デビュー" class="w-full h-32 object-cover rounded-t-lg">
+                            <div class="p-4">
+                                <h4 class="font-bold text-gray-800">トラステッド</h4>
+                                <p class="text-sm text-gray-600 mt-1">意外と時間かかった</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Item 2 -->
+                    <div class="relative pl-16 mb-12 group fade-in-up" style="transition-delay: 0.1s;">
+                        <div class="timeline-icon-box-mobile">
+                            <i class="fa-solid fa-person"></i>
+                        </div>
+                        <div class="timeline-content-wrapper-mobile">
+                            <div class="timeline-year font-extrabold text-xl">2024.05.15</div>
+                            <div class="timeline-description text-gray-700 mt-1 text-base">ライムちゃん</div>
+                        </div>
+                        <div class="history-popup-mobile">
+                            <img src="https://pbs.twimg.com/media/GNlu5l0a4AAo8Bx?format=jpg&name=large" alt="ライムちゃん" class="w-full h-32 object-cover rounded-t-lg">
+                            <div class="p-4">
+                                <h4 class="font-bold text-gray-800">ライムちゃんになる</h4>
+                                <p class="text-sm text-gray-600 mt-1">フレンドさんからいただいてライムちゃんになりました</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Item 3 -->
+                    <div class="relative pl-16 mb-12 group fade-in-up" style="transition-delay: 0.2s;">
+                        <div class="timeline-icon-box-mobile">
+                            <i class="fa-solid fa-person"></i>
+                        </div>
+                        <div class="timeline-content-wrapper-mobile">
+                            <div class="timeline-year font-extrabold text-xl">2024.11.11</div>
+                            <div class="timeline-description text-gray-700 mt-1 text-base">シフォンちゃん</div>
+                        </div>
+                        <div class="history-popup-mobile">
+                            <img src="https://pbs.twimg.com/media/GoYGDPwXUAAhKdw?format=jpg&name=medium" alt="シフォンちゃん" class="w-full h-32 object-cover rounded-t-lg">
+                            <div class="p-4">
+                                <h4 class="font-bold text-gray-800">シフォンちゃんになる</h4>
+                                <p class="text-sm text-gray-600 mt-1">シフォンちゃん似合いそうと言われたのでシフォンちゃんになりました</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Item 4 -->
+                    <div class="relative pl-16 mb-12 group fade-in-up" style="transition-delay: 0.3s;">
+                        <div class="timeline-icon-box-mobile">
+                            <i class="fa-solid fa-earth-americas timeline-icon"></i>
+                        </div>
+                        <div class="timeline-content-wrapper-mobile">
+                            <div class="timeline-year font-extrabold text-xl">202X.XX.XX</div>
+                            <div class="timeline-description text-gray-700 mt-1 text-base">未定</div>
+                        </div>
+                        <div class="history-popup-mobile">
+                            <img src="https://placehold.co/400x300/A5B4FC/1E3A8A?text=NoImage" alt="未定" class="w-full h-32 object-cover rounded-t-lg">
+                            <div class="p-4">
+                                <h4 class="font-bold text-gray-800">これから</h4>
+                                <p class="text-sm text-gray-600 mt-1">？？？</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- ===== Gallery セクション ===== -->
+        <section id="gallery" class="py-16 md:py-24 gallery-bg overflow-hidden">
+            <div class="container mx-auto px-6">
+                <!-- ★ テキスト色を更新 -->
+                <h2 class="text-4xl font-bold text-center mb-16 text-gray-800 fade-in-up dark:text-gray-100">Gallery</h2>
+            </div>
+        
+            <!-- ★ 1つ目のスクロールトラック (右から左へ) -->
+            <div class="gallery-scroller" data-direction="left">
+                <div class="gallery-track">
+                    <!-- 画像セット 1 (1〜3) -->
+                    <div class="gallery-scroller-item">
+                        <img src="https://pbs.twimg.com/media/GzbgNc6aUAAuG3U?format=jpg&name=large" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://pbs.twimg.com/media/Gz1Sa59aoAAFHfd?format=jpg&name=large" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://pbs.twimg.com/media/G0UYckhboAAcatr?format=jpg&name=large" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://pbs.twimg.com/media/G1W-w2fbYAEqQqd?format=jpg&name=large" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://pbs.twimg.com/media/G2ERA4QbMAAXxti?format=jpg&name=large" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://pbs.twimg.com/media/G3DOnntaAAAEEI8?format=png&name=900x900" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://pbs.twimg.com/media/G37w88hW4AACpko?format=jpg&name=medium" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://pbs.twimg.com/media/G4lHOx_asAE5Hhu?format=jpg&name=large" alt="ギャラリー画像" />
+                    </div>
+                    <!-- 画像セット 1 の複製 (ループ用) -->
+                    <div class="gallery-scroller-item">
+                        <img src="https://pbs.twimg.com/media/GzbgNc6aUAAuG3U?format=jpg&name=large" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://pbs.twimg.com/media/Gz1Sa59aoAAFHfd?format=jpg&name=large" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://pbs.twimg.com/media/G0UYckhboAAcatr?format=jpg&name=large" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://pbs.twimg.com/media/G1W-w2fbYAEqQqd?format=jpg&name=large" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://pbs.twimg.com/media/G2ERA4QbMAAXxti?format=jpg&name=large" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://pbs.twimg.com/media/G3DOnntaAAAEEI8?format=png&name=900x900" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://pbs.twimg.com/media/G37w88hW4AACpko?format=jpg&name=medium" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://pbs.twimg.com/media/G4lHOx_asAE5Hhu?format=jpg&name=large" alt="ギャラリー画像" />
+                    </div>
+                </div>
+            </div>
+        
+            <!-- ★ 2つ目のスクロールトラック (左から右へ) -->
+            <div class="gallery-scroller mt-8" data-direction="right">
+                <div class="gallery-track">
+                    <!-- 画像セット 2 (4〜6) -->
+                    <div class="gallery-scroller-item">
+                        <img src="https://media.discordapp.net/attachments/1436224680938963087/1436224828129673257/VRChat_2025-09-01_11-15-37.531_1080x1920.png?ex=690ed41a&is=690d829a&hm=4ef4c3424d56993cd53b645fb1084585b6c753ed96b1e665f4d9e60fc18d2290&=&format=webp&quality=lossless&width=459&height=815" alt="ギャラリー画像" />
+                    </div>
+                        <div class="gallery-scroller-item">
+                        <img src="https://media.discordapp.net/attachments/1436224680938963087/1436225039790768282/VRChat_2025-09-02_18-14-56.540_1080x1920.png?ex=690ed44d&is=690d82cd&hm=ab4a493366460de88dcda94ccd1430dc227219d3119e402592c78259465d82ee&=&format=webp&quality=lossless&width=459&height=815" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://media.discordapp.net/attachments/1436224680938963087/1436225141976858675/VRChat_2025-09-21_00-43-17.650_1080x1920.png?ex=690ed465&is=690d82e5&hm=a76e7313496470265af9410ff0946f41eef8a659ae2a0795d012e4b9ab8a7ad6&=&format=webp&quality=lossless&width=246&height=438" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://media.discordapp.net/attachments/1436224680938963087/1436225212910665908/VRChat_2025-09-28_20-51-24.922_1080x1920.png?ex=690ed476&is=690d82f6&hm=54e22d18fc2b8c982d32254a14f11c226065384331d1590bb7fa28db253532ff&=&format=webp&quality=lossless&width=459&height=815" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://media.discordapp.net/attachments/1436224680938963087/1436225340220506122/VRChat_2025-10-07_03-12-03.122_1920x1080.png?ex=690ed494&is=690d8314&hm=eaca62abfa9253e8d8ca8c343b4a09c72c1590043880e27add5fc863856ff36b&=&format=webp&quality=lossless&width=688&height=386" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://media.discordapp.net/attachments/1436224680938963087/1436226328134291508/VRChat_2025-08-07_16-34-39.250_1920x1080.png?ex=690ed580&is=690d8400&hm=19490288d32aef1a87aac877e24dd67c57c2799426c4ae4d4665e51b13fff817&=&format=webp&quality=lossless&width=459&height=815" alt="ギャラリー画像" />
+                    </div>
+                    <!-- 画像セット 2 の複製 (ループ用) -->
+                    <div class="gallery-scroller-item">
+                        <img src="https://media.discordapp.net/attachments/1436224680938963087/1436224828129673257/VRChat_2025-09-01_11-15-37.531_1080x1920.png?ex=690ed41a&is=690d829a&hm=4ef4c3424d56993cd53b645fb1084585b6c753ed96b1e665f4d9e60fc18d2290&=&format=webp&quality=lossless&width=459&height=815" alt="ギャラリー画像" />
+                    </div>
+                        <div class="gallery-scroller-item">
+                        <img src="https://media.discordapp.net/attachments/1436224680938963087/1436225039790768282/VRChat_2025-09-02_18-14-56.540_1080x1920.png?ex=690ed44d&is=690d82cd&hm=ab4a493366460de88dcda94ccd1430dc227219d3119e402592c78259465d82ee&=&format=webp&quality=lossless&width=459&height=815" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://media.discordapp.net/attachments/1436224680938963087/1436225141976858675/VRChat_2025-09-21_00-43-17.650_1080x1920.png?ex=690ed465&is=690d82e5&hm=a76e7313496470265af9410ff0946f41eef8a659ae2a0795d012e4b9ab8a7ad6&=&format=webp&quality=lossless&width=246&height=438" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://media.discordapp.net/attachments/1436224680938963087/1436225212910665908/VRChat_2025-09-28_20-51-24.922_1080x1920.png?ex=690ed476&is=690d82f6&hm=54e22d18fc2b8c982d32254a14f11c226065384331d1590bb7fa28db253532ff&=&format=webp&quality=lossless&width=459&height=815" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://media.discordapp.net/attachments/1436224680938963087/1436225340220506122/VRChat_2025-10-07_03-12-03.122_1920x1080.png?ex=690ed494&is=690d8314&hm=eaca62abfa9253e8d8ca8c343b4a09c72c1590043880e27add5fc863856ff36b&=&format=webp&quality=lossless&width=688&height=386" alt="ギャラリー画像" />
+                    </div>
+                    <div class="gallery-scroller-item">
+                        <img src="https://media.discordapp.net/attachments/1436224680938963087/1436226328134291508/VRChat_2025-08-07_16-34-39.250_1920x1080.png?ex=690ed580&is=690d8400&hm=19490288d32aef1a87aac877e24dd67c57c2799426c4ae4d4665e51b13fff817&=&format=webp&quality=lossless&width=459&height=815" alt="ギャラリー画像" />
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ===== フッター ===== -->
+    <footer class="py-12 footer-bg">
+        <div class="container mx-auto px-6 text-center">
+            <!-- ★ テキスト色を更新 -->
+            <p class="text-gray-500 dark:text-gray-400">&copy; 2025 Lyra. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- ===== ★ ライトボックス (モーダル) ★ ===== -->
+    <div id="lightbox" class="lightbox-overlay">
+        <!-- ★ ボタン色を更新 -->
+        <button id="lightbox-close" class="lightbox-close-btn">&times;</button>
+        <div class="lightbox-content">
+            <img id="lightbox-image" src="" alt="拡大画像">
+        </div>
+    </div>
+
+
+    <!-- 外部JSファイル --><script src="script.js"></script>
+
+</body>
+</html>
