@@ -104,7 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
             link.addEventListener('click', toggleMenu);
         });
     } else {
-        console.warn("モバイルメニューの要素が見つかりませんでした。 ('#menu-btn' または '#mobile-menu')");
     }
 
 
@@ -369,7 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
         animate(); 
 
     } else {
-        console.warn("パーティクルキャンバス '#particle-canvas' が見つかりませんでした。");
+        console.warn("'#particle-canvas' not found");
     }
 
     
@@ -420,7 +419,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     } else {
-        console.warn("ライトボックスの関連要素が見つかりませんでした。");
     }
 
     
@@ -642,16 +640,12 @@ document.addEventListener('DOMContentLoaded', () => {
         animateCursorParticles(); 
 
     } else {
-        console.warn("カーソルパーティクルキャンバス '#cursor-particle-canvas' が見つかりませんでした。");
+        console.warn("'#cursor-particle-canvas' not found");
     }
 
 
     
 
-    /**
-     * .timeline-year 要素のフォントサイズを、
-     * 親要素にはみ出さないように（改行されないように）調整します。
-     */
     function adjustHistoryYearFontSizes() {
         const yearSelectors = '.timeline-year';
         const MIN_FONT_SIZE = 10; 
