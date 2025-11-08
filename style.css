@@ -754,10 +754,6 @@ body.menu-open-blur header {
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
 }
 
-/* .timeline-year の色指定は、
-  デスクトップ用の .timeline-year と .dark .timeline-year が
-  そのままモバイルにも適用されるため、追加の指定は不要です。
-*/
 
 
 
@@ -921,12 +917,6 @@ body.menu-open-blur header {
 }
 
 .gallery-scroller-item:hover img {
-    /* ★ 修正: 
-       1. 拡大率を 1.15 に少し抑える
-       2. 拡大にかかる時間(duration)を 2秒 に延長
-       3. イージングを (0.22, 1, 0.36, 1) [easeOutQuint] に変更
-          (初動が速く、最後が非常にゆっくりになる)
-    */
     transform: scale(1.15);
     filter: blur(1px);
     transition: transform 2s cubic-bezier(0.22, 1, 0.36, 1), 
@@ -1140,4 +1130,3 @@ footer {
 
 .dark .about-card-container::before {
         background: linear-gradient(to bottom right, #2564ebaa, #A855F7aa, #D946EFaa); }
-/* ... (既存のコード) ... */
