@@ -1,36 +1,36 @@
-// ===== ★ グローバル変数定義 ★ =====
+
 let isDarkMode = false;
 let ctx = null;
 let particles = [];
 let animationFrameId = null;
 
-// ★ 追加: カーソルパーティクル用のグローバル変数
+
 let cursorCtx = null;
 let cursorParticles = [];
 let mouse = { x: null, y: null };
 let cursorAnimationId = null;
-// ★ 追加: 波紋パーティクル用の配列
+
 let rippleParticles = [];
-// ★ 追加: パステルカラーの色相リスト
+
 const pastelHues = [0, 30, 60, 100, 150, 180, 210, 240, 270, 300, 330];
 
 
-// ★ パーティクルの色の定義 (グローバルスコープ)
+
 const particleColors = {
     light: {
-        particle: 'rgba(156, 163, 175, 0.5)', // gray-500, 50%
-        line: '156, 163, 175' // RGB (strokeStyle用)
+        particle: 'rgba(156, 163, 175, 0.5)', 
+        line: '156, 163, 175' 
     },
     dark: {
-        particle: 'rgba(107, 114, 128, 0.4)', // gray-400, 40%
-        line: '107, 114, 128' // RGB (strokeStyle用)
+        particle: 'rgba(107, 114, 128, 0.4)', 
+        line: '107, 114, 128' 
     }
 };
 
-// ===== ★ パーティクル色を動的に更新する関数 (グローバルスコープ) ★ =====
+
 const updateParticleColors = (dark) => {
     const newColor = dark ? particleColors.dark.particle : particleColors.light.particle;
-    // 既存のパーティクルの色を更新
+    
     for (let i = 0; i < particles.length; i++) {
         if (particles[i]) {
             particles[i].color = newColor;
@@ -38,7 +38,7 @@ const updateParticleColors = (dark) => {
     }
 };
 
-// ===== ★ テーマを適用する関数 (グローバルスコープ) ★ =====
+
 const applyTheme = (dark) => {
     const htmlEl = document.documentElement;
 
@@ -50,42 +50,42 @@ const applyTheme = (dark) => {
         localStorage.setItem('theme', 'light');
     }
     
-    // グローバル変数を更新
+    
     isDarkMode = dark;
     
-    // パーティクル色を更新
+    
     updateParticleColors(dark);
 };
 
-// ===== ★ DOMContentLoaded イベントリスナー ★ =====
+
 document.addEventListener('DOMContentLoaded', () => {
 
-    // ===== 1. ダークモード初期化 =====
+    
     const themeToggles = document.querySelectorAll('.theme-toggle');
     
-    // 1.1. localStorage から設定を読み込む
+    
     const savedTheme = localStorage.getItem('theme');
-    // 1.2. OSの優先設定をチェック
+    
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-    // 1.3. 初期モードの決定 (localStorage > OS設定 > デフォルト(ライト))
+    
     let initialDarkMode = false;
     if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
         initialDarkMode = true;
     }
 
-    // 1.4. 初期ロード時にテーマを適用 (グローバル変数 isDarkMode も設定される)
+    
     applyTheme(initialDarkMode);
 
-    // 1.5. トグルボタンのイベントリスナー
+    
     themeToggles.forEach(toggle => {
         toggle.addEventListener('click', () => {
-            // 現在のモード (isDarkMode) の逆を適用
+            
             applyTheme(!isDarkMode);
         });
     });
 
-    // ===== 2. ハンバーガーメニューのロジック =====
+    
     const menuBtn = document.getElementById('menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
     const menuLinks = document.querySelectorAll('.menu-link');
@@ -108,11 +108,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // ===== 3. スクロールアニメーション (Intersection Observer) =====
-    const sections = document.querySelectorAll('.fade-in-up, .fade-in-right');
+    
+    
+    const sectionsFadeInUp = document.querySelectorAll('.fade-in-up');
+    const sectionsFadeInRight = document.querySelectorAll('.fade-in-right');
+
+    
+    const animatedHeadings = document.querySelectorAll('#history h2.fade-in-up, #gallery h2.fade-in-up');
 
     if ('IntersectionObserver' in window) {
-        const observer = new IntersectionObserver((entries, observer) => {
+        
+        
+        const observerOnce = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('is-visible');
@@ -121,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         entry.target.style.transitionDelay = '0s';
                     }
 
-                    observer.unobserve(entry.target);
+                    observer.unobserve(entry.target); 
                 }
             });
         }, { 
@@ -129,16 +136,50 @@ document.addEventListener('DOMContentLoaded', () => {
             rootMargin: '0px 0px -50px 0px' 
         });
 
-        sections.forEach(section => {
-            observer.observe(section);
+        
+        sectionsFadeInRight.forEach(section => {
+            observerOnce.observe(section);
         });
+        
+        
+        const animatedHeadingsSet = new Set(animatedHeadings); 
+        sectionsFadeInUp.forEach(section => {
+            if (!animatedHeadingsSet.has(section)) {
+                observerOnce.observe(section);
+            }
+        });
+
+
+        
+        if (animatedHeadings.length > 0) {
+            const headingObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    } else {
+                        
+                        entry.target.classList.remove('is-visible');
+                    }
+                });
+            }, { 
+                threshold: 0.1, 
+                rootMargin: '0px 0px -50px 0px' 
+            });
+
+            animatedHeadings.forEach(heading => {
+                headingObserver.observe(heading);
+            });
+        }
+
     } else {
-        sections.forEach(section => {
+        
+        
+        [...sectionsFadeInUp, ...sectionsFadeInRight].forEach(section => {
             section.classList.add('is-visible');
         });
     }
 
-    // ===== 4. スクロールでヘダーの背景を変更 =====
+    
     const header = document.querySelector('header');
     window.addEventListener('scroll', () => {
         if (window.scrollY > 50) {
@@ -148,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ===== 5. Active Nav Link on Scroll =====
+    
     const sectionsForNav = document.querySelectorAll('main > section[id]');
     const navLinks = document.querySelectorAll('.nav-link');
     const mobileNavLinks = document.querySelectorAll('#mobile-menu .menu-link');
@@ -158,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
             link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
         });
         mobileNavLinks.forEach(link => {
-            // ★ ダークモードを考慮 (JSでのクラス操作は避けるためCSS側で .dark .menu-link.text-gray-800 を上書き)
+            
             link.classList.toggle('text-blue-500', link.getAttribute('href') === `#${id}`);
             link.classList.toggle('text-gray-800', link.getAttribute('href') !== `#${id}`);
         });
@@ -200,10 +241,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ===== 6. History タイムライン描画アニメーション =====
+    
     const historySection = document.getElementById('history');
-    const historyLine = document.querySelector('.history-line'); // Desktop
-    const historyLineMobile = document.querySelector('.history-line-mobile'); // Mobile
+    const historyLine = document.querySelector('.history-line'); 
+    const historyLineMobile = document.querySelector('.history-line-mobile'); 
     
     if (historySection && (historyLine || historyLineMobile)) {
         const historyObserver = new IntersectionObserver((entries) => {
@@ -221,10 +262,10 @@ document.addEventListener('DOMContentLoaded', () => {
         historyObserver.observe(historySection);
     }
 
-    // ===== 7. パーティクル背景のロジック =====
+    
     const canvas = document.getElementById('particle-canvas');
     if (canvas) {
-        ctx = canvas.getContext('2d'); // グローバル ctx を設定
+        ctx = canvas.getContext('2d'); 
 
         const resizeCanvas = () => {
             canvas.width = window.innerWidth;
@@ -263,13 +304,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const initParticles = () => {
-            particles = []; // グローバル particles をリセット
+            particles = []; 
             
             let particleCount = Math.floor(canvas.width / 30); 
             if (particleCount < 40) particleCount = 40; 
             if (particleCount > 100) particleCount = 100;
 
-            // ★ 初期色を現在のモード (isDarkMode) から決定
+            
             const initialColor = isDarkMode ? particleColors.dark.particle : particleColors.light.particle;
 
             for (let i = 0; i < particleCount; i++) {
@@ -277,17 +318,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 let x = Math.random() * (canvas.width - radius * 2) + radius;
                 let y = Math.random() * (canvas.height - radius * 2) + radius;
                 let dx = (Math.random() - 0.5) * 0.8;
-                let dy = (Math.random() - 0.5) * 0.8; // Y軸の移動速度
+                let dy = (Math.random() - 0.5) * 0.8; 
                 
-                particles.push(new Particle(x, y, dx, dy, radius, initialColor)); // ★ 色を適用
+                particles.push(new Particle(x, y, dx, dy, radius, initialColor)); 
             }
         };
 
-        // パーティクル同士を線で結ぶ
+        
         const connectParticles = () => {
             let maxDistance = 100;
             
-            // ★ 線の色も現在のモード (isDarkMode) から決定
+            
             const currentLineColor = isDarkMode ? particleColors.dark.line : particleColors.light.line;
 
             for (let a = 0; a < particles.length; a++) {
@@ -297,7 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     let distance = Math.sqrt(dx * dx + dy * dy);
 
                     if (distance < maxDistance) {
-                        ctx.strokeStyle = `rgba(${currentLineColor}, ${1 - distance / maxDistance})`; // ★ 変更
+                        ctx.strokeStyle = `rgba(${currentLineColor}, ${1 - distance / maxDistance})`; 
                         ctx.lineWidth = 0.5;
                         ctx.beginPath();
                         ctx.moveTo(particles[a].x, particles[a].y);
@@ -308,7 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        // アニメーションループ
+        
         const animate = () => {
             animationFrameId = requestAnimationFrame(animate);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -316,22 +357,22 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let i = 0; i < particles.length; i++) {
                 particles[i].update();
             }
-            connectParticles(); // ★ 毎フレーム isDarkMode をチェックして線の色を描画
+            connectParticles(); 
         };
 
         window.addEventListener('resize', resizeCanvas);
-        resizeCanvas(); // 初期化
+        resizeCanvas(); 
         
         if (animationFrameId) {
             cancelAnimationFrame(animationFrameId);
         }
-        animate(); // アニメーションループを開始
+        animate(); 
 
     } else {
         console.warn("パーティクルキャンバス '#particle-canvas' が見つかりませんでした。");
     }
 
-    // ===== 8. ライトボックス (モーダル) のロジック =====
+    
     const lightbox = document.getElementById('lightbox');
     const lightboxImage = document.getElementById('lightbox-image');
     const lightboxCloseBtn = document.getElementById('lightbox-close');
@@ -382,15 +423,15 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn("ライトボックスの関連要素が見つかりませんでした。");
     }
 
-    // ===== ★ 追加: 9. カーソルパーティクルのロジック =====
+    
     const cursorCanvas = document.getElementById('cursor-particle-canvas');
     if (cursorCanvas) {
-        cursorCtx = cursorCanvas.getContext('2d'); // グローバル cursorCtx を設定
-        cursorParticles = []; // グローバル配列
-        rippleParticles = []; // ★ 波紋配列を初期化
-        mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 }; // 初期位置
-        let prevMouse = { x: mouse.x, y: mouse.y }; // ★ マウスの前の位置を追跡
-        let frameCount = 0; // ★ 密度調整用のフレームカウンター
+        cursorCtx = cursorCanvas.getContext('2d'); 
+        cursorParticles = []; 
+        rippleParticles = []; 
+        mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 }; 
+        let prevMouse = { x: mouse.x, y: mouse.y }; 
+        let frameCount = 0; 
 
         const resizeCursorCanvas = () => {
             cursorCanvas.width = window.innerWidth;
@@ -398,14 +439,14 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         window.addEventListener('resize', resizeCursorCanvas);
-        resizeCursorCanvas(); // 初期化
+        resizeCursorCanvas(); 
 
-        // マウス位置の更新
+        
         window.addEventListener('mousemove', (e) => {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
         });
-        // スマホやタブレット用のタッチ操作
+        
         window.addEventListener('touchstart', (e) => {
             if (e.touches.length > 0) {
                 mouse.x = e.touches[0].clientX;
@@ -419,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }, { passive: true });
 
-        // ★ 追加: クリック（タップ）で波紋を生成
+        
         window.addEventListener('click', (e) => {
             createRipple(e.clientX, e.clientY);
         });
@@ -429,30 +470,34 @@ document.addEventListener('DOMContentLoaded', () => {
             constructor(x, y) {
                 this.x = x;
                 this.y = y;
-                // 広がる速度
-                this.vx = (Math.random() - 0.5) * 3.5; // 少し抑えめ
-                this.vy = (Math.random() - 0.5) * 3.5; // 少し抑えめ
-                // 重力（少し下に落ちるように）
-                this.gravity = 0.06;
-                this.radius = Math.random() * 3 + 2; // サイズ
-                this.life = 50 + Math.random() * 30; // 寿命
+                
+                this.vx = (Math.random() - 0.5) * 2.0; 
+                this.vy = (Math.random() - 0.5) * 2.0; 
+                
+                this.gravity = 0.01;
+                this.radius = Math.random() * 3 + 2; 
+                
+                this.life = 80 + Math.random() * 50; 
                 this.maxLife = this.life;
-                // ★ 形状を追加
+                
                 this.shape = ['circle', 'square', 'triangle'][Math.floor(Math.random() * 3)];
-                // ★ パステルカラーの色相
+                
                 this.hue = pastelHues[Math.floor(Math.random() * pastelHues.length)];
-                // ★ 回転用
+                
                 this.angle = Math.random() * Math.PI * 2;
                 this.rotationSpeed = (Math.random() - 0.5) * 0.08;
             }
 
             update() {
                 this.life--;
-                // 重力を速度に加算
+                
+                this.vx *= 0.98;
+                this.vy *= 0.98;
+                
                 this.vy += this.gravity;
-                // 回転
+                
                 this.angle += this.rotationSpeed;
-                // 位置を更新
+                
                 this.x += this.vx;
                 this.y += this.vy;
             }
@@ -460,22 +505,22 @@ document.addEventListener('DOMContentLoaded', () => {
             draw() {
                 if (this.life <= 0) return;
                 
-                // 寿命に応じて透明度とサイズを変更
+                
                 const opacity = Math.max(0, this.life / this.maxLife);
                 const radius = Math.max(0, this.radius * (this.life / this.maxLife));
                 
                 cursorCtx.save();
-                // 色相(hue)を使い、透明度(opacity)でフェードアウトさせる
-                // ★ 彩度 80%, 輝度 85% に変更（淡いパステル）
+                
+                
                 cursorCtx.fillStyle = `hsla(${this.hue}, 80%, 85%, ${opacity})`;
                 
-                // 回転と移動
+                
                 cursorCtx.translate(this.x, this.y);
                 cursorCtx.rotate(this.angle);
                 
                 cursorCtx.beginPath();
 
-                // ★ 形状によって描画を分岐
+                
                 switch (this.shape) {
                     case 'circle':
                         cursorCtx.arc(0, 0, radius, 0, Math.PI * 2, false);
@@ -496,21 +541,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // ★ 追加: 波紋パーティクルクラス
+        
         class RippleParticle {
             constructor(x, y) {
                 this.x = x;
                 this.y = y;
                 this.radius = 1;
-                this.maxRadius = 40 + Math.random() * 30; // 波紋の最大サイズ
-                this.life = 1; // 寿命（透明度として使う）
+                this.maxRadius = 40 + Math.random() * 30; 
+                this.life = 1; 
                 this.hue = pastelHues[Math.floor(Math.random() * pastelHues.length)];
             }
 
             update() {
-                // 半径を徐々に大きく、スピードは遅く
+                
                 this.radius += (this.maxRadius - this.radius) * 0.04;
-                // 寿命を減らす
+                
                 this.life -= 0.015;
             }
 
@@ -519,86 +564,162 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 cursorCtx.beginPath();
                 cursorCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-                // ★ 淡いパステルの線
+                
                 cursorCtx.strokeStyle = `hsla(${this.hue}, 80%, 85%, ${this.life})`;
                 cursorCtx.lineWidth = 2;
                 cursorCtx.stroke();
             }
         }
 
-        // ★ 追加: 波紋生成関数
+        
         const createRipple = (x, y) => {
-            // 一度に3つの波紋を生成
+            
             for (let i = 0; i < 3; i++) {
                 rippleParticles.push(new RippleParticle(x, y));
             }
         };
 
         const createCursorParticles = () => {
-            // ★ 1フレームに1回だけ生成（密度下げ）
-            if (mouse.x !== null && frameCount % 1 === 0) { 
+            
+            if (mouse.x !== null && frameCount % 2 === 0) { 
                 cursorParticles.push(new CursorParticle(mouse.x, mouse.y));
             }
         };
 
         const animateCursorParticles = () => {
-            // キャンバスをクリア
+            
             cursorCtx.clearRect(0, 0, cursorCanvas.width, cursorCanvas.height);
 
-            frameCount++; // ★ フレームカウンターを増やす
+            frameCount++; 
 
-            // ★ マウスが動いているかチェック
+            
             const mouseMoved = mouse.x !== prevMouse.x || mouse.y !== prevMouse.y;
 
-            // パーティクルを生成 (マウスが動いている時のみ)
-            if (mouse.x !== null && mouseMoved) { // マウスが一度でも動いてから生成開始
+            
+            if (mouse.x !== null && mouseMoved) { 
                 createCursorParticles();
             }
 
-            // カーソルパーティクルを更新・描画
+            
             for (let i = cursorParticles.length - 1; i >= 0; i--) {
                 const p = cursorParticles[i];
                 p.update();
                 p.draw();
 
-                // 寿命が尽きたら削除
+                
                 if (p.life <= 0) {
                     cursorParticles.splice(i, 1);
                 }
             }
             
-            // ★ 波紋パーティクルを更新・描画
+            
             for (let i = rippleParticles.length - 1; i >= 0; i--) {
                 const r = rippleParticles[i];
                 r.update();
                 r.draw();
-                // 寿命が尽きたら削除
+                
                 if (r.life <= 0) {
                     rippleParticles.splice(i, 1);
                 }
             }
 
-            // 配列が大きくなりすぎないように制限
-            if (cursorParticles.length > 200) { // 制限を 200 に
+            
+            if (cursorParticles.length > 200) { 
                 cursorParticles.splice(0, cursorParticles.length - 200);
             }
 
-            // ★ 最後にマウス位置を更新
+            
             prevMouse.x = mouse.x;
             prevMouse.y = mouse.y;
 
             cursorAnimationId = requestAnimationFrame(animateCursorParticles);
         };
 
-        // 既存のアニメーションIDがあればキャンセル（念のため）
+        
         if (cursorAnimationId) {
             cancelAnimationFrame(cursorAnimationId);
         }
-        animateCursorParticles(); // アニメーション開始
+        animateCursorParticles(); 
 
     } else {
         console.warn("カーソルパーティクルキャンバス '#cursor-particle-canvas' が見つかりませんでした。");
     }
 
 
-}); // === DOMContentLoaded 終了 ===
+    
+
+    /**
+     * .timeline-year 要素のフォントサイズを、
+     * 親要素にはみ出さないように（改行されないように）調整します。
+     */
+    function adjustHistoryYearFontSizes() {
+        const yearSelectors = '.timeline-year';
+        const MIN_FONT_SIZE = 10; 
+
+        const yearElements = document.querySelectorAll(yearSelectors);
+        if (yearElements.length === 0) return;
+
+        yearElements.forEach(elem => {
+            
+            elem.style.fontSize = ''; 
+            elem.style.whiteSpace = ''; 
+
+            
+            
+            let currentSize = parseFloat(window.getComputedStyle(elem).fontSize) || 22;
+            
+            
+            const checkOverflow = (el) => {
+                
+                if (!el || el.clientWidth === 0) return false;
+
+                
+                const originalWhitespace = el.style.whiteSpace;
+                el.style.whiteSpace = 'nowrap';
+
+                
+                
+                const isOverflowing = el.scrollWidth > (el.clientWidth + 1);
+
+                
+                
+                el.style.whiteSpace = originalWhitespace; 
+
+                return isOverflowing;
+            };
+
+            
+            
+            
+            elem.style.fontSize = currentSize + 'px';
+            
+            
+            while (checkOverflow(elem) && currentSize > MIN_FONT_SIZE) {
+                currentSize --; 
+                elem.style.fontSize = currentSize + 'px';
+            }
+            
+            
+            
+            
+            elem.style.whiteSpace = ''; 
+        });
+    }
+
+    
+    
+    adjustHistoryYearFontSizes();
+
+    
+    
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            adjustHistoryYearFontSizes();
+        }, 100); 
+    });
+
+
+}); 
